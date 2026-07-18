@@ -2,24 +2,30 @@ package app.vercel.northwind.login;
 
 import app.vercel.northwind.base.BaseTest;
 
+import app.vercel.northwind.utils.DataTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class LoginTest extends BaseTest {
 
     @Test
     public void testValidarCamposObrigatoriosVazios() {
 
-        //driver.get("https://northwind-test-platform.vercel.app/");
-        driver.get(baseUrl);
+        WebElement inputEmail = driver.findElement(By.name("email"));
+        WebElement inputPassword = driver.findElement(By.name("password"));
+        WebElement btnLogin = driver.findElement(By.xpath("//button[@type='submit']"));
 
-        driver.findElement(By.name("email")).click();
-        driver.findElement(By.name("password")).click();
-        driver.findElement(By.xpath("//button[@type='submit']")).click();
+        inputEmail.click();
+        inputPassword.click();
+        btnLogin.click();
 
-        //Assertions.assertTrue(driver.findElement(By.cssSelector("[data-testid='password-error']")).isDisplayed(),"Email e senha são obrigatórios");
+
         WebElement mensagem = driver.findElement(By.cssSelector("[data-testid='password-error']"));
         Assertions.assertTrue((mensagem.isDisplayed()));
         Assertions.assertEquals("Email e senha são obrigatórios", mensagem.getText());
@@ -27,40 +33,68 @@ public class LoginTest extends BaseTest {
 
     @Test
     public void testValidarFormatoEmailInvalido() {
-        driver.get(baseUrl);
 
-        driver.findElement(By.name("email")).sendKeys("usuario.invalido");
-        driver.findElement(By.name("password")).sendKeys("Senha123");
-        driver.findElement(By.xpath("//button[@type='submit']")).click();
+        WebElement inputEmail = driver.findElement(By.name("email"));
+        WebElement inputPassword = driver.findElement(By.name("password"));
+        WebElement btnLogin = driver.findElement(By.xpath("//button[@type='submit']"));
 
-        Assertions.assertTrue(
-                driver.findElement(By.cssSelector("[data-testid='email-error']")).isDisplayed(),"Formato de email inválido. Use: nome@dominio.com"
-        );
+        inputEmail.sendKeys(DataTest.EMAIL_INVALIDO);
+        inputPassword.sendKeys(DataTest.SENHA_VALIDA);
+        btnLogin.click();
+
+
+        WebElement mensagem = driver.findElement(By.cssSelector("[data-testid='email-error']"));
+        Assertions.assertTrue((mensagem.isDisplayed()));
+        Assertions.assertEquals(DataTest.MSG_EMAIL_INVALIDO, mensagem.getText());
     }
 
     @Test
     public void testValidarUsuarioNaoCadastrado() {
-        driver.get(baseUrl);
 
-        driver.findElement(By.name("email")).sendKeys("usuario123456@gmail.com");
-        driver.findElement(By.name("password")).sendKeys("Senha123");
-        driver.findElement(By.xpath("//button[@type='submit']")).click();
+        WebElement inputEmail = driver.findElement(By.name("email"));
+        WebElement inputPassword = driver.findElement(By.name("password"));
+        WebElement btnLogin = driver.findElement(By.xpath("//button[@type='submit']"));
 
-        Assertions.assertTrue(
-                driver.findElement(By.cssSelector("[data-testid='email-error']")).isDisplayed(),"Usuário não encontrado. Verifique o email ou cadastre-se."
-        );
+        inputEmail.sendKeys(DataTest.EMAIL_INEXISTENTE);
+        inputPassword.sendKeys(DataTest.SENHA_VALIDA);
+        btnLogin.click();
+
+
+        WebElement mensagem = driver.findElement(By.cssSelector("[data-testid='email-error']"));
+        Assertions.assertTrue((mensagem.isDisplayed()));
+        Assertions.assertEquals(DataTest.MSG_USUARIO_NAO_ENCONTRADO, mensagem.getText());
     }
 
     @Test
     public void testValidarSenhaIncorreta() {
-        driver.get(baseUrl);
 
-        // Preenche email correto e senha incorreta
-        driver.findElement(By.name("email")).sendKeys("admin@qatest.com");
+        WebElement inputEmail = driver.findElement(By.name("email"));
+        WebElement inputPassword = driver.findElement(By.name("password"));
+        WebElement btnLogin = driver.findElement(By.xpath("//button[@type='submit']"));
 
-        driver.findElement(By.name("password")).sendKeys("SenhaIncorreta@123");
-        driver.findElement(By.xpath("//button[@type='submit']")).click();
+        inputEmail.sendKeys(DataTest.EMAIL_VALIDO);
+        inputPassword.sendKeys(DataTest.SENHA_INVALIDA);
+        btnLogin.click();
 
-        Assertions.assertTrue(driver.findElement(By.cssSelector("[data-testid='password-error']")).isDisplayed(),"Email ou senha inválidos");
+
+        WebElement mensagem = driver.findElement(By.cssSelector("[data-testid='password-error']"));
+        Assertions.assertTrue((mensagem.isDisplayed()));
+        Assertions.assertEquals(DataTest.MSG_SENHA_INVALIDA, mensagem.getText());
+    }
+
+    @Test
+    public void testLoginComSucesso() {
+
+        WebElement inputEmail = driver.findElement(By.name("email"));
+        WebElement inputPassword = driver.findElement(By.name("password"));
+        WebElement btnLogin = driver.findElement(By.xpath("//button[@type='submit']"));
+
+        inputEmail.sendKeys(DataTest.EMAIL_VALIDO);
+        inputPassword.sendKeys(DataTest.SENHA_VALIDA);
+        btnLogin.click();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.urlToBe("https://northwind-test-platform.vercel.app/products"));
+        Assertions.assertEquals("https://northwind-test-platform.vercel.app/products", driver.getCurrentUrl());
     }
 }

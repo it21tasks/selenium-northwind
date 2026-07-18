@@ -22,9 +22,10 @@ public class BaseTest {
         Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
 
         driver = new ChromeDriver();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(9));
-    }
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
 
+        driver.get(baseUrl);
+    }
 
     @AfterEach
     public void tearDown() {
